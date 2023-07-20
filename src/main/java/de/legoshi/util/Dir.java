@@ -13,24 +13,22 @@ public class Dir {
         for (File file : files) {
             if (file.isDirectory()) {
                 fileArrayList.add(file);
-                // System.out.println("Ordner: " + file.getName());
-                if(!(file.listFiles().length <= 1)) {
+                if (!(file.listFiles().length <= 1)) {
                     fileArrayList.addAll(getDirectories(file.listFiles()));
                 }
             }
         }
         return fileArrayList;
     }
-
+    
     public static boolean fileExists(Label label, File startFile) {
         if (!startFile.exists()) {
             label.setText("FEHLER! Dateipfad existiert nicht.");
             return false;
-        }
-        else {
+        } else {
             label.setText("FEHLER! Dateipfad existiert!");
             return true;
         }
     }
-
+    
 }

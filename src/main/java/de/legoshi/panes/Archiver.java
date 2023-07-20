@@ -15,17 +15,17 @@ import java.util.Comparator;
 import java.util.List;
 
 public class Archiver extends Task<Void> {
-
+    
     public double dirCount;
     public double dirChecked;
     public File startFile;
-
+    
     public Archiver(File startFile) {
         dirCount = 0;
         dirChecked = 1;
         this.startFile = startFile;
     }
-
+    
     @Override
     protected Void call() {
         File[] files = startFile.listFiles();
@@ -46,21 +46,21 @@ public class Archiver extends Task<Void> {
         }
         return null;
     }
-
+    
     private void addArchive(File file) {
         if (!file.getAbsoluteFile().getName().contains("Archiv")) {
             File archiv = new File(file.getAbsolutePath() + "/Archiv");
             if (!archiv.exists()) archiv.mkdir();
         }
     }
-
+    
     //returns all files with the endings of .ecw .jgw .jpg .asc .las .dgn
     public List<TitelObject> getTitelObjects(File directory) {
         File[] files = directory.listFiles();
         List<TitelObject> titelObjects = new ArrayList<>();
         for (File file : files) {
             if (file.getName().length() > 3) {
-
+                
                 String endingName = file.getName().substring(file.getName().length() - 4);
                 if (endingName.equals(".ecw") || endingName.equals(".jgw") || endingName.equals(".jpg")
                         || endingName.equals(".asc") || endingName.equals(".las") || endingName.equals(".dgn")) {
@@ -71,7 +71,7 @@ public class Archiver extends Task<Void> {
         }
         return titelObjects;
     }
-
+    
     //checks for duplicates
     public void checkForDuplicates(List<TitelObject> titelObjectArrayList, Path archivpath) {
         titelObjectArrayList.sort(Comparator.comparing(TitelObject::getW1String).thenComparing(TitelObject::getW2String));
@@ -86,7 +86,7 @@ public class Archiver extends Task<Void> {
             if (first.equals(second)) moveFile(t1, t2, archivpath, i);
         }
     }
-
+    
     public void moveFile(TitelObject t1, TitelObject t2, Path archivpath, int i) {
         int date1 = Integer.parseInt(t1.getW2String());
         int date2 = Integer.parseInt(t2.getW2String());
