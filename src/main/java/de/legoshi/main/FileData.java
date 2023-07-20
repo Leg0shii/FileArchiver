@@ -1,6 +1,6 @@
-package main;
+package de.legoshi.main;
 
-import util.TableObjectLC;
+import de.legoshi.util.TableObjectLC;
 
 import java.util.ArrayList;
 

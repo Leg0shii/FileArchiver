@@ -1,4 +1,4 @@
-package util;
+package de.legoshi.util;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -15,7 +15,6 @@ public class TitelObject {
       public String w2String;
 
       public TitelObject(File file, String original) {
-
             this.file = file;
             this.original = original;
             this.w1String = original.substring(0,11); //+ original.substring(original.length()-4); -> adds ending and prevents .jpg and jgw to overlap
