@@ -21,7 +21,6 @@ public class Main extends Application {
     public void start(Stage primaryStage) {
         fileData = new FileData();
         try {
-            // System.out.println("PAAAAAAAAAATH: " + new File("../").getAbsolutePath());
             Parent root = FXMLLoader.load(getClass().getResource("/sample.fxml"));
             primaryStage.setResizable(false);
             primaryStage.setTitle("DB-Helfer");

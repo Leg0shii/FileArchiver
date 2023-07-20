@@ -1,5 +1,6 @@
 package de.legoshi.panes;
 
+import de.legoshi.util.DirectoryPaths;
 import javafx.concurrent.Task;
 import de.legoshi.main.Main;
 import de.legoshi.util.TableObjectLC;
@@ -17,8 +18,8 @@ import java.util.stream.Collectors;
 
 public class DataRoute extends Task<Void> {
     
-    private double startKM = -9999;
-    private double endKM = -9999;
+    private double startKM = Integer.MIN_VALUE;
+    private double endKM = Integer.MIN_VALUE;
     
     private final String startLC;
     private final String endLC;
@@ -27,21 +28,6 @@ public class DataRoute extends Task<Void> {
     private final File saveFile;
     
     private final boolean kmVal;
-    
-    private final String[] searchFileNames = {
-            "/01174_Laserdaten/ASC/",
-            "/01174_Laserdaten/LAS/",
-            "/01173_Orthofotos/ECW/",
-            "/01173_Orthofotos/Geo_tiff/",
-            "/01173_Orthofotos/jpg/",
-            "/01173_Orthofotos/jgw/"
-    };
-    
-    private String[] folderNames = {
-            "/01174_Laserdaten/",
-            "/01173_Orthofotos/",
-            "/01177_Hoehenlinien/"
-    };
     
     public DataRoute(File searchFile, File saveFile, String startLC, String endLC) {
         this.startLC = startLC.toLowerCase();
@@ -72,7 +58,7 @@ public class DataRoute extends Task<Void> {
             return;
         }
         
-        if ((startKM == -9999 || endKM == -9999) && kmVal) return;
+        if ((startKM == Integer.MIN_VALUE || endKM == Integer.MIN_VALUE) && kmVal) return;
         
         List<TableObjectLC> results;
         if (!kmVal) {
@@ -115,7 +101,7 @@ public class DataRoute extends Task<Void> {
             }
         }
         
-        for (String path : searchFileNames) {
+        for (String path : DirectoryPaths.SEARCH_FILE_NAMES) {
             File file = new File(path);
             file = generateSavingFile(file);
             if (!file.exists()) continue;
@@ -124,7 +110,7 @@ public class DataRoute extends Task<Void> {
             }
         }
         
-        for (String path : folderNames) {
+        for (String path : DirectoryPaths.FOLDER_NAMES) {
             File file = new File(path);
             file = generateSavingFile(file);
             if (!file.exists()) continue;
@@ -201,7 +187,7 @@ public class DataRoute extends Task<Void> {
         
         List<File> foundFolders = new ArrayList<>();
         for (String names : fileNames) {
-            for (String folders : searchFileNames) {
+            for (String folders : DirectoryPaths.SEARCH_FILE_NAMES) {
                 File newSearchFile = new File(searchFile + folders + names);
                 if (newSearchFile.exists() && !foundFolders.contains(newSearchFile)) {
                     foundFolders.add(newSearchFile);
@@ -256,7 +242,7 @@ public class DataRoute extends Task<Void> {
     }
     
     private boolean filesExist(File path) {
-        for (String fileName : searchFileNames) {
+        for (String fileName : DirectoryPaths.SEARCH_FILE_NAMES) {
             File file = new File(path.getPath() + fileName);
             if (!file.exists()) {
                 updateMessage("FEHLER! " + fileName + " existiert nicht!");

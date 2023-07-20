@@ -18,11 +18,6 @@ import java.util.concurrent.atomic.AtomicReference;
 @Setter
 public class DataLoader extends Task<LoadingState> {
     
-    // return 0 - all failed
-    // return 1 - DGN success
-    // return 2 - KM success
-    // return 3 - all success
-    
     private File fileDGN;
     private File fileKM;
     private boolean dgn = false;

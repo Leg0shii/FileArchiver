@@ -6,7 +6,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Dir {
+public class DirHelper {
     //returns a list of all sub folders
     public static List<File> getDirectories(File[] files) {
         List<File> fileArrayList = new ArrayList<>();

@@ -11,7 +11,7 @@ import javafx.scene.layout.GridPane;
 import de.legoshi.panes.Archiver;
 import de.legoshi.panes.DataLoader;
 import de.legoshi.panes.DataRoute;
-import de.legoshi.util.Dir;
+import de.legoshi.util.DirHelper;
 
 import java.awt.*;
 import java.awt.datatransfer.Clipboard;
@@ -206,7 +206,7 @@ public class Controller implements Initializable {
             progressBar.setProgress(0);
             String path = tfield1.getText();
             File startFile = new File(path);
-            if (!Dir.fileExists(archLog, startFile)) return;
+            if (!DirHelper.fileExists(archLog, startFile)) return;
             
             archLog.setText("Starte...");
             
