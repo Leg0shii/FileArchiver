@@ -1,4 +1,4 @@
-package de.legoshi.panes;
+package de.legoshi.archiver.load;
 
 import de.legoshi.util.LoadingState;
 import javafx.concurrent.Task;

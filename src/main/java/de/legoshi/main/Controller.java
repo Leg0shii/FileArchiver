@@ -8,9 +8,9 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
-import de.legoshi.panes.Archiver;
-import de.legoshi.panes.DataLoader;
-import de.legoshi.panes.DataRoute;
+import de.legoshi.archiver.Archiver;
+import de.legoshi.archiver.load.DataLoader;
+import de.legoshi.archiver.route.DataRoute;
 import de.legoshi.util.DirHelper;
 
 import java.awt.*;

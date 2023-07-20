@@ -1,5 +1,7 @@
-package de.legoshi.panes;
+package de.legoshi.archiver.route;
 
+import de.legoshi.archiver.FileHandler;
+import de.legoshi.archiver.FolderHandler;
 import de.legoshi.util.DirectoryPaths;
 import javafx.concurrent.Task;
 import de.legoshi.main.Main;
@@ -27,7 +29,7 @@ public class DataRoute extends Task<Void> {
     private final File searchFile;
     private final File saveFile;
     
-    private final boolean kmVal;
+    private boolean kmVal;
     
     public DataRoute(File searchFile, File saveFile, String startLC, String endLC) {
         this.startLC = startLC.toLowerCase();
@@ -38,49 +40,59 @@ public class DataRoute extends Task<Void> {
     }
     
     public DataRoute(File searchFile, File saveFile, String startLC, String endLC, String startKM, String endKM) {
-        this.startLC = startLC;
-        this.endLC = endLC;
+        this(searchFile, saveFile, startLC, endLC);
         try {
             this.startKM = Double.parseDouble(startKM);
             this.endKM = Double.parseDouble(endKM);
         } catch (NumberFormatException numberFormatException) {
             updateMessage("FEHLER! Bitte gibt eine Zahl ein.");
         }
-        this.searchFile = searchFile;
-        this.saveFile = saveFile;
         this.kmVal = true;
     }
     
     public void startSearch() {
-        if (!filesExist(searchFile)) {
+        if (!FileHandler.filesExist(searchFile)) {
             updateMessage("FEHLER! Datei existiert nicht.");
             updateProgress(0, 100);
             return;
         }
         
-        if ((startKM == Integer.MIN_VALUE || endKM == Integer.MIN_VALUE) && kmVal) return;
+        if ((startKM == Integer.MIN_VALUE || endKM == Integer.MIN_VALUE) && kmVal) {
+            updateMessage("FEHLER! Werte nicht initialisiert.");
+            return;
+        }
         
         List<TableObjectLC> results;
         if (!kmVal) {
             updateMessage("Laden aller DGNs.");
-            results = getAllDGNs(startLC, endLC);
+            results = getAllDGNs();
         } else {
             updateMessage("Laden aller Order.");
             results = getAllResults();
         }
+        
         updateMessage("Erstellen aller Ordner.");
-        createFolders(saveFile);
+        try {
+            FolderHandler.createFolders(saveFile);
+        } catch (Exception e) {
+            updateMessage(e.getMessage());
+        }
+        updateMessage("Alle Ordner erstellt!");
         
         updateMessage("Laden aller Ordnerinhalte.");
         List<File> files = getFiles(results);
+        updateMessage("Alle Ordnerinhalte geladen!");
+        
         updateMessage("Laden aller Dateien aus den Ordnern.");
         List<File> saveFiles = loadAllFiles(files, results);
+        updateMessage("Alle Daten geladen!");
+        
         updateMessage("Speichere Dateien...");
         int amount = saveAllFiles(saveFiles);
+        updateMessage("Alle Daten gespeichert!");
         
         updateMessage("Lösche alle leeren Ordner.");
-        removeEmptyFolders(files);
-        
+        FolderHandler.removeEmptyFolders(files, saveFile);
         updateMessage("Suche erfolgreich! " + amount + " Dateien gefunden.");
     }
     
@@ -90,41 +102,6 @@ public class DataRoute extends Task<Void> {
         return results.stream()
                 .filter(t -> startLC.equals(t.getDgnText()) && endLC.equals(t.getDgnText()) && startKM <= t.getKm() && endKM >= t.getKm())
                 .collect(Collectors.toCollection(ArrayList::new));
-    }
-    
-    private void removeEmptyFolders(List<File> files) {
-        for (File file : files) {
-            file = generateSavingFile(file);
-            if (!file.exists()) continue;
-            if (!(file.list().length > 0)) {
-                System.out.println(file.delete());
-            }
-        }
-        
-        for (String path : DirectoryPaths.SEARCH_FILE_NAMES) {
-            File file = new File(path);
-            file = generateSavingFile(file);
-            if (!file.exists()) continue;
-            if (!(file.list().length > 0)) {
-                System.out.println(file.delete());
-            }
-        }
-        
-        for (String path : DirectoryPaths.FOLDER_NAMES) {
-            File file = new File(path);
-            file = generateSavingFile(file);
-            if (!file.exists()) continue;
-            if (!(file.list().length > 0)) {
-                System.out.println(file.delete());
-            }
-        }
-        
-    }
-    
-    private File generateSavingFile(File file) {
-        String[] temp = file.getAbsolutePath().split(":");
-        String entirePath = saveFile + temp[1];
-        return new File(entirePath);
     }
     
     private int saveAllFiles(List<File> filesToSave) {
@@ -140,6 +117,7 @@ public class DataRoute extends Task<Void> {
             } catch (IOException e) {
                 e.printStackTrace();
             }
+            
             count.getAndSet(count.get() + 1);
             updateMessage("Gespeichert: " + count.get().intValue() + "/" + (int) amount + " Dateien.");
             updateProgress((count.get().intValue() / amount) * 100, 100);
@@ -149,7 +127,6 @@ public class DataRoute extends Task<Void> {
     
     private List<File> loadAllFiles(List<File> folders, List<TableObjectLC> tableObjectLCS) {
         List<File> saveFiles = new ArrayList<>();
-        
         for (File folder : folders) {
             File[] f = folder.listFiles();
             if (f != null) {
@@ -166,7 +143,7 @@ public class DataRoute extends Task<Void> {
         return saveFiles;
     }
     
-    private List<TableObjectLC> getAllDGNs(String startLC, String endLC) {
+    private List<TableObjectLC> getAllDGNs() {
         List<TableObjectLC> results = Main.fileData.getArrayList();
         return results.stream()
                 .filter(t -> startLC.compareTo(t.getDgnText()) <= 0 && endLC.compareTo(t.getDgnText()) >= 0)
@@ -203,53 +180,20 @@ public class DataRoute extends Task<Void> {
         Polygon polySquare = new Polygon(
                 new int[]{point.x, point.x + 100, point.x + 100, point.x},
                 new int[]{point.y, point.y, point.y + 100, point.y + 100},
-                4);
+                4
+        );
         
         for (TableObjectLC tableObjectLC : results) {
             Polygon polygon2 = new Polygon(
                     new int[]{tableObjectLC.getP1().x, tableObjectLC.getP2().x, tableObjectLC.getP3().x, tableObjectLC.getP4().x},
                     new int[]{tableObjectLC.getP1().y, tableObjectLC.getP2().y, tableObjectLC.getP3().y, tableObjectLC.getP4().y},
-                    4);
-            if (polySquare.intersects(polygon2.getBounds2D())) return true;
-            
+                    4
+            );
+            if (polySquare.intersects(polygon2.getBounds2D())) {
+                return true;
+            }
         }
         return false;
-    }
-    
-    
-    private void createFolders(File file) {
-        if (!file.exists()) file.mkdir();
-        String path = file.getPath();
-        
-        createFile(path, "/01173_Orthofotos/");
-        createFile(path, "/01174_Laserdaten/");
-        createFile(path + "/01173_Orthofotos/", "ECW");
-        createFile(path + "/01173_Orthofotos/", "Geo_tiff");
-        createFile(path + "/01173_Orthofotos/", "Jpg");
-        createFile(path + "/01173_Orthofotos/", "jgw");
-        createFile(path + "/01174_Laserdaten/", "ASC");
-        createFile(path + "/01174_Laserdaten/", "LAS");
-        createFile(path, "/01177_Hoehenlinien/");
-    }
-    
-    private void createFile(String path, String name) {
-        File file = new File(path + name);
-        if (!file.exists()) {
-            if (!file.mkdir()) {
-                updateMessage("FEHLER! Konnte folgenden Ordner nicht erstellen:  " + name);
-            }
-        }
-    }
-    
-    private boolean filesExist(File path) {
-        for (String fileName : DirectoryPaths.SEARCH_FILE_NAMES) {
-            File file = new File(path.getPath() + fileName);
-            if (!file.exists()) {
-                updateMessage("FEHLER! " + fileName + " existiert nicht!");
-                return false;
-            }
-        }
-        return true;
     }
     
     @Override

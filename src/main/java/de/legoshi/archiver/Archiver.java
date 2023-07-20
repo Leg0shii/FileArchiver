@@ -1,4 +1,4 @@
-package de.legoshi.panes;
+package de.legoshi.archiver;
 
 import javafx.concurrent.Task;
 import de.legoshi.util.DirHelper;
@@ -29,7 +29,7 @@ public class Archiver extends Task<Void> {
     protected Void call() {
         File[] files = startFile.listFiles();
         if (files != null) {
-            List<File> directories = DirHelper.getDirectories(files);
+            List<File> directories = FolderHandler.getDirectories(files);
             this.dirCount = directories.size();
             for (File dir : directories) {
                 List<TitelObject> titelObjects = getTitelObjects(dir);
